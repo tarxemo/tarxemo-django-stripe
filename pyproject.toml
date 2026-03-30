@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tarxemo-django-stripe"
+version = "0.1.0"
+authors = [
+  { name="TarXemo", email="info@tarxemo.com" },
+]
+description = "A professional Django library for integrating Stripe payments, refunds, and subscriptions"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 3.2",
+    "Framework :: Django :: 4.0",
+    "Framework :: Django :: 5.0",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP",
+]
+dependencies = [
+    "Django>=3.2",
+    "stripe>=8.0.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/tarxemo/tarxemo-django-stripe"
+"Bug Tracker" = "https://github.com/tarxemo/tarxemo-django-stripe/issues"
+
+[tool.setuptools]
+packages = ["stripe_payments"]
+include-package-data = true

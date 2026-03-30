@@ -1,0 +1,7 @@
+include LICENSE
+include README.md
+recursive-include stripe_payments *.py
+recursive-include stripe_payments/templates *
+recursive-include stripe_payments/static *
+global-exclude __pycache__
+global-exclude *.py[co]
