@@ -1,0 +1,257 @@
+Metadata-Version: 2.4
+Name: tarxemo-django-stripe
+Version: 0.1.0
+Summary: A professional Django library for integrating Stripe payments, refunds, and subscriptions
+Home-page: https://github.com/tarxemo/tarxemo-django-stripe
+Author: TarXemo
+Author-email: TarXemo <info@tarxemo.com>
+License: MIT License
+        
+        Copyright (c) 2026 TarXemo
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: Homepage, https://github.com/tarxemo/tarxemo-django-stripe
+Project-URL: Bug Tracker, https://github.com/tarxemo/tarxemo-django-stripe/issues
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Classifier: Framework :: Django :: 3.2
+Classifier: Framework :: Django :: 4.0
+Classifier: Framework :: Django :: 5.0
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Internet :: WWW/HTTP
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: Django>=3.2
+Requires-Dist: stripe>=8.0.0
+Dynamic: author
+Dynamic: home-page
+Dynamic: license-file
+Dynamic: requires-python
+
+# tarxemo-django-stripe
+
+A professional, service-oriented Django library for integrating Stripe payments, refunds, and subscriptions. This library mirrors the architecture of `tarxemo-django-clickpesa` to provide a consistent development experience.
+
+---
+
+## Features
+
+- **✅ Payments (SCA Ready)**
+    - Easy PaymentIntent creation (for custom checkouts)
+    - Full support for Stripe Checkout (hosted payment pages)
+    - Automatic handling of 3DS authentication
+- **✅ Subscriptions**
+    - Create, update, and cancel subscriptions
+    - Trial period support
+    - Billing portal integration (self-service for customers)
+- **✅ Refunds**
+    - Full and partial refund support
+    - Refund status tracking
+- **✅ Customer Management**
+    - Seamless mapping of Django Users to Stripe Customers
+    - Shared payment methods
+- **✅ Webhooks**
+    - Secure signature verification
+    - Idempotent processing (prevents double-processing)
+    - Django Signals for all major events
+- **✅ Rich Admin Dashboard**
+    - View all transactions, subscriptions, and events
+    - Visual status badges
+    - Synchronize status with a single click
+
+---
+
+## Installation
+
+### From PyPI
+```bash
+pip install tarxemo-django-stripe
+```
+
+### From Source
+```bash
+pip install git+https://github.com/tarxemo/tarxemo-django-stripe.git
+```
+
+---
+
+## Configuration
+
+### 1. Register the App
+Add `stripe_payments` to your `INSTALLED_APPS` in `settings.py`:
+
+```python
+INSTALLED_APPS = [
+    ...
+    'stripe_payments',
+]
+```
+
+### 2. Configure Credentials
+Add your Stripe keys to `settings.py`. It is recommended to use environment variables for security.
+
+```python
+import os
+
+# Stripe Configuration
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
+```
+
+### 3. Register Webhook URL
+Add the library's URLs to your project's `urls.py`:
+
+```python
+from django.urls import path, include
+
+urlpatterns = [
+    ...
+    path('stripe/', include('stripe_payments.urls')),
+]
+```
+
+### 4. Run Migrations
+```bash
+python manage.py migrate stripe_payments
+```
+
+---
+
+## Core Concepts
+
+The library follows a layered architecture to keep your code clean:
+
+1.  **Managers (High-level)**: Use these for 90% of your work. They handle business logic, database persistence, and emit Django signals.
+    - `PaymentManager`
+    - `RefundManager`
+    - `SubscriptionManager`
+    - `CustomerManager`
+2.  **Services (Low-level)**: Direct wrappers for the Stripe API. Use these only if you need low-level control.
+3.  **Signals**: Decouple your app logic from payment processing by listening to events like `payment_succeeded`.
+
+---
+
+## Usage Examples
+
+### 1. Simple Payment (Checkout)
+
+The quickest way to accept payments via a hosted Stripe page:
+
+```python
+from stripe_payments import PaymentManager
+
+manager = PaymentManager()
+payment = manager.create_checkout_session(
+    line_items=[{
+        'price_data': {
+            'currency': 'usd',
+            'product_data': {'name': 'Luxury Watch'},
+            'unit_amount': 25000, # $250.00
+        },
+        'quantity': 1,
+    }],
+    success_url='https://example.com/success?ref={CHECKOUT_SESSION_ID}',
+    cancel_url='https://example.com/cancel',
+    order_reference='ORDER-1001',
+    user=request.user
+)
+
+# Redirect the user to use the hosted page
+return redirect(payment.checkout_url)
+```
+
+### 2. Subscription Management
+
+```python
+from stripe_payments import SubscriptionManager
+
+manager = SubscriptionManager()
+
+# Create subscription with trial
+subscription = manager.create_subscription(
+    user=request.user,
+    price_id='price_standard_monthly',
+    trial_period_days=14
+)
+
+# Open billing portal (for customers to manage their own plan)
+portal_url = manager.get_billing_portal_url(
+    user=request.user, 
+    return_url='https://example.com/account'
+)
+return redirect(portal_url)
+```
+
+### 3. Listening for Events (Signals)
+
+Decouple your business logic:
+
+```python
+from django.dispatch import receiver
+from stripe_payments.signals import payment_succeeded
+
+@receiver(payment_succeeded)
+def on_payment_success(sender, instance, **kwargs):
+    # 'instance' is a StripePaymentTransaction model
+    order_ref = instance.order_reference
+    user = instance.user
+    
+    # Your fulfillment logic here
+    fulfill_order(order_ref, user)
+```
+
+### 4. Processing Refunds
+
+```python
+from stripe_payments import RefundManager
+
+manager = RefundManager()
+refund = manager.create_refund(
+    order_reference='ORDER-1001',
+    amount=50.00, # Partial refund
+    reason='requested_by_customer'
+)
+```
+
+---
+
+## Security Best Practices
+
+- **Never commit keys**: Always use environment variables for `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`.
+- **Verify Signatures**: This library automatically verifies all incoming webhook signatures.
+- **Production Key**: Ensure you use `sk_live_...` in production. The library will warn you if it detects a test key when `DEBUG=False`.
+
+---
+
+## License
+
+MIT License. See [LICENSE](LICENSE) for details.
+Made with ❤️ by TarXemo.
+# tarxemo-django-stripe
