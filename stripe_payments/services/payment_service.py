@@ -5,13 +5,13 @@ import logging
 import stripe
 from decimal import Decimal
 
-from .constants import (
+from ..constants import (
     STRIPE_API_VERSION,
     ZERO_DECIMAL_CURRENCIES,
     DEFAULT_TIMEOUT,
     MAX_RETRIES,
 )
-from .exceptions import (
+from ..exceptions import (
     ConfigurationError,
     PaymentError,
     PaymentDeclinedError,
@@ -23,7 +23,7 @@ from .exceptions import (
     DuplicateOrderReferenceError,
     APIError,
 )
-from .utils import get_stripe_api_key, amount_to_stripe_units
+from ..utils import get_stripe_api_key, amount_to_stripe_units
 
 logger = logging.getLogger("stripe_payments.payment_service")
 

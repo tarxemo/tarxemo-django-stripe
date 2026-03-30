@@ -4,9 +4,9 @@ Low-level Stripe service: Webhook signature verification and event parsing.
 import logging
 import stripe
 
-from .constants import STRIPE_API_VERSION
-from .exceptions import WebhookSignatureError, WebhookError, ConfigurationError
-from .utils import get_stripe_api_key, get_webhook_secret
+from ..constants import STRIPE_API_VERSION
+from ..exceptions import WebhookSignatureError, WebhookError, ConfigurationError
+from ..utils import get_stripe_api_key, get_webhook_secret
 
 logger = logging.getLogger("stripe_payments.webhook_service")
 

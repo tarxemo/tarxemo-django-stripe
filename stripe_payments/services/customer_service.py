@@ -5,8 +5,8 @@ import logging
 import stripe
 from decimal import Decimal
 
-from .constants import STRIPE_API_VERSION
-from .exceptions import (
+from ..constants import STRIPE_API_VERSION
+from ..exceptions import (
     CustomerError,
     CustomerNotFoundError,
     SubscriptionError,
