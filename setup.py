@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="tarxemo-django-stripe",
-    version="0.1.2",
+    version="0.1.3",
     author="TarXemo",
     author_email="info@tarxemo.com",
     description="A professional Django library for integrating Stripe payments, refunds, and subscriptions",
